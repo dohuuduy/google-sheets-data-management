@@ -1,7 +1,7 @@
 // API URL từ Apps Script
 
 var gData;
-var url =  'https://script.google.com/macros/s/AKfycbzU3Zi3S3yLVqk1KgvEPDbOckJiSajU77q7qMCBYsZVJKeNtVgOnfwmyLTdrbxc7ojo/exec' 
+var url =  'https://script.google.com/macros/s/AKfycbxNjpgrFEHG-Kxg3QiVk6-13LOuNosbyyqumKKmEW3nzjvcTQUu_LzbmfYQZ7L-00G1fg/exec' 
 
   function getDataAPI() {  
     $('#d_table').html('<div class="col">Please Wait.....</div>') 
