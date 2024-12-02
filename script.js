@@ -31,120 +31,107 @@ async function loadData() {
 }
 
 // Hiển thị dữ liệu trong bảng HTML
-function renderTable(data) {
-    const tableBody = document.getElementById('dataTableBody');
-    tableBody.innerHTML = '';
+// Biến toàn cục để lưu dữ liệu
+let data = [];
+let currentEditId = null;
 
-    data.slice(1).forEach(row => {
-        const [id, name, amount, category] = row;
-        const tr = document.createElement('tr');
+// Hàm hiển thị dữ liệu lên bảng
+function renderTable() {
+    const tableBody = document.getElementById("dataTableBody");
+    tableBody.innerHTML = ""; // Xóa dữ liệu cũ
+
+    data.forEach((row, index) => {
+        const tr = document.createElement("tr");
         tr.innerHTML = `
-            <td>${id}</td>
-            <td>${name}</td>
-            <td>${amount}</td>
-            <td>${category}</td>
+            <td>${index + 1}</td>
+            <td>${row.name}</td>
+            <td>${row.amount}</td>
+            <td>${row.category}</td>
             <td>
-                <button onclick="editData(${id})">Edit</button>
-                <button onclick="deleteData(${id})">Delete</button>
-            </td>`;
+                <button onclick="editData(${index})">Edit</button>
+                <button onclick="deleteData(${index})">Delete</button>
+            </td>
+        `;
         tableBody.appendChild(tr);
     });
 }
 
-// Thêm dữ liệu mới
-async function addData() {
-    const name = document.getElementById('name').value;
-    const amount = document.getElementById('amount').value;
-    const category = document.getElementById('category').value;
+// Hàm thêm dữ liệu
+function addData() {
+    const name = document.getElementById("name").value.trim();
+    const amount = document.getElementById("amount").value.trim();
+    const category = document.getElementById("category").value.trim();
 
     if (!name || !amount || !category) {
-        alert('Please fill in all fields');
+        alert("All fields are required!");
         return;
     }
 
-    try {
-        await fetch(apiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                action: 'addData',
-                data: { name, amount, category }
-            })
-        });
-        alert('Data added successfully!');
-        loadData();
-    } catch (error) {
-        console.error('Error adding data:', error);
-    }
+    data.push({ name, amount: parseFloat(amount), category });
+    renderTable();
+
+    // Xóa dữ liệu sau khi thêm
+    document.getElementById("name").value = "";
+    document.getElementById("amount").value = "";
+    document.getElementById("category").value = "";
 }
 
-// Sửa dữ liệu
-function editData(id) {
-    const row = document.querySelector(`tr td:first-child:contains('${id}')`).parentNode;
-    const name = row.children[1].textContent;
-    const amount = row.children[2].textContent;
-    const category = row.children[3].textContent;
+// Hàm sửa dữ liệu
+function editData(index) {
+    const item = data[index];
+    currentEditId = index;
 
-    document.getElementById('editId').value = id;
-    document.getElementById('editName').value = name;
-    document.getElementById('editAmount').value = amount;
-    document.getElementById('editCategory').value = category;
+    // Hiển thị thông tin cũ lên form edit
+    document.getElementById("editId").value = index;
+    document.getElementById("editName").value = item.name;
+    document.getElementById("editAmount").value = item.amount;
+    document.getElementById("editCategory").value = item.category;
 
-    document.getElementById('editSection').style.display = 'block';
-    document.getElementById('addSection').style.display = 'none';
+    // Ẩn form thêm và hiển thị form sửa
+    document.getElementById("addSection").style.display = "none";
+    document.getElementById("editSection").style.display = "block";
 }
 
-// Lưu thay đổi khi chỉnh sửa
-async function saveEdit() {
-    const id = document.getElementById('editId').value;
-    const name = document.getElementById('editName').value;
-    const amount = document.getElementById('editAmount').value;
-    const category = document.getElementById('editCategory').value;
+// Hàm lưu dữ liệu sau khi sửa
+function saveData() {
+    const index = parseInt(document.getElementById("editId").value, 10);
+    const name = document.getElementById("editName").value.trim();
+    const amount = document.getElementById("editAmount").value.trim();
+    const category = document.getElementById("editCategory").value.trim();
 
     if (!name || !amount || !category) {
-        alert('Please fill in all fields');
+        alert("All fields are required!");
         return;
     }
 
-    try {
-        await fetch(apiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                action: 'editData',
-                data: { id, editName: name, editAmount: amount, editCategory: category }
-            })
-        });
-        alert('Data updated successfully!');
-        cancelEdit();
-        loadData();
-    } catch (error) {
-        console.error('Error updating data:', error);
-    }
+    // Cập nhật dữ liệu
+    data[index] = { name, amount: parseFloat(amount), category };
+    renderTable();
+
+    // Reset form
+    cancelEdit();
 }
 
-// Hủy chỉnh sửa
+// Hàm hủy sửa
 function cancelEdit() {
-    document.getElementById('editSection').style.display = 'none';
-    document.getElementById('addSection').style.display = 'block';
+    document.getElementById("addSection").style.display = "block";
+    document.getElementById("editSection").style.display = "none";
+    document.getElementById("editId").value = "";
+    document.getElementById("editName").value = "";
+    document.getElementById("editAmount").value = "";
+    document.getElementById("editCategory").value = "";
 }
 
-// Xóa dữ liệu
-async function deleteData(id) {
-    if (!confirm('Are you sure you want to delete this item?')) return;
-
-    try {
-        await fetch(apiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                action: 'deleteData',
-                data: { deleteId: id }
-            })
-        });
-        alert('Data deleted successfully!');
-        loadData();
-    } catch (error) {
-        console.error('Error deleting data:', error);
+// Hàm xóa dữ liệu
+function deleteData(index) {
+    if (confirm("Are you sure you want to delete this entry?")) {
+        data.splice(index, 1);
+        renderTable();
     }
 }
+
+// Gắn sự kiện vào các nút
+document.getElementById("addBtn").addEventListener("click", addData);
+document.getElementById("saveBtn").addEventListener("click", saveData);
+document.getElementById("cancelEditBtn").addEventListener("click", cancelEdit);
+
