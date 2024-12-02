@@ -110,7 +110,21 @@ async function deleteRecord(id) {
 }
 
 // Khởi chạy ứng dụng
-$(document).ready(() => {
-    fetchData();
-    $('#btnAdd').click(addRecord);
+fetch(url, {
+    method: 'POST',
+    body: formData,
+})
+.then(response => response.json())
+.then(data => {
+    console.log('Server Response:', data);
+    if (data.status === 'success') {
+        alert('Operation successful');
+    } else {
+        alert('Operation failed: ' + (data.message || 'Unknown error'));
+    }
+})
+.catch(error => {
+    console.error('Error:', error);
+    alert('Network error: ' + error.message);
 });
+
