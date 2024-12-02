@@ -3,31 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Management</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <title>CRUD Operations</title>
+    <script>
+        const url = google.script.run.withSuccessHandler(renderTable);
+
+        // Load dữ liệu
+        function loadData() {
+            fetchScript('getData', {}).then(renderTable);
+        }
+
+        // Thêm mới
+        function addData() {
+            const name = document.getElementById('name').value;
+            const amount = document.getElementById('amount').value;
+            const category = document.getElementById('category').value;
+
+            fetchScript('addData', { name, amount, category }).then(loadData);
+        }
+
+        // Sửa dữ liệu
+        function editData(id) {
+            const name = prompt('Enter new name:');
+            const amount = prompt('Enter new amount:');
+            const category = prompt('Enter new category:');
+            fetchScript('editData', { id, name, amount, category }).then(loadData);
+        }
+
+        // Xóa dữ liệu
+        function deleteData(id) {
+            if (confirm('Are you sure to delete this record?')) {
+                fetchScript('deleteData', { id }).then(loadData);
+            }
+        }
+
+        // Gửi yêu cầu
+        async function fetchScript(action, data) {
+            const response = await fetch('', {
+                method: 'POST',
+                body: JSON.stringify({ action, data }),
+            });
+            return await response.json();
+        }
+
+        // Render bảng
+        function renderTable(data) {
+            const table = document.getElementById('data-table');
+            table.innerHTML = data.data.map(row => `
+                <tr>
+                    <td>${row[0]}</td>
+                    <td>${row[1]}</td>
+                    <td>${row[2]}</td>
+                    <td>${row[3]}</td>
+                    <td>
+                        <button onclick="editData(${row[0]})">Edit</button>
+                        <button onclick="deleteData(${row[0]})">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        document.addEventListener('DOMContentLoaded', loadData);
+    </script>
 </head>
 <body>
-    <div class="container mt-4">
-        <h3>Google Sheets Data Management</h3>
-        <form id="dataForm">
-            <div class="mb-3">
-                <label for="name" class="form-label">Name</label>
-                <input type="text" class="form-control" id="name" required>
-            </div>
-            <div class="mb-3">
-                <label for="amount" class="form-label">Amount</label>
-                <input type="number" class="form-control" id="amount" required>
-            </div>
-            <div class="mb-3">
-                <label for="category" class="form-label">Category</label>
-                <input type="text" class="form-control" id="category" required>
-            </div>
-            <button type="button" id="btnAdd" class="btn btn-primary">Add Record</button>
-        </form>
-        <div id="dataTable" class="mt-4"></div>
-    </div>
-    <script src="script.js"></script>
+    <h1>CRUD Operations</h1>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Amount</th>
+                <th>Category</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="data-table"></tbody>
+    </table>
+
+    <h2>Add New Record</h2>
+    <input id="name" placeholder="Name" />
+    <input id="amount" placeholder="Amount" />
+    <input id="category" placeholder="Category" />
+    <button onclick="addData()">Add</button>
 </body>
 </html>
