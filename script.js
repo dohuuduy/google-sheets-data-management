@@ -1,5 +1,5 @@
 // API URL từ Apps Script
-const apiUrl = 'https://script.google.com/macros/s/AKfycbwTaZfyZr834zutleId9HHfDulV8d2K6PdmY83IG4sQc9oYVtJwSymdCOUrkRbhKVV5/exec';
+const apiUrl = https://script.google.com/macros/s/AKfycbzU3Zi3S3yLVqk1KgvEPDbOckJiSajU77q7qMCBYsZVJKeNtVgOnfwmyLTdrbxc7ojo/exec';
 
 // Khởi tạo ứng dụng
 document.addEventListener('DOMContentLoaded', () => {
